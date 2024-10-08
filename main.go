@@ -19,7 +19,9 @@ var LMAP = ListMap{
 
 func main() {
 
-	f, err := os.Open("config.yml")
+	args := os.Args[1]
+
+	f, err := os.Open(args)
 	if err != nil {
 		panic(err)
 	}
