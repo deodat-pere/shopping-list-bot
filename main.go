@@ -54,14 +54,15 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	botName, err := b.GetMyName(ctx, &bot.GetMyNameParams{})
+	me, err := b.GetMe(ctx)
+	botName := me.Username
 
 	if err != nil {
 		println("Couldn't get name")
 		return
 	}
 
-	action, err := ParseCommand(update, &botName)
+	action, err := ParseCommand(update, botName)
 
 	if err != nil {
 		return
