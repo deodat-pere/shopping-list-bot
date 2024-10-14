@@ -22,7 +22,7 @@ type Action struct {
 	arg2   string
 }
 
-func ParseCommand(update *models.Update) (Action, error) {
+func ParseCommand(update *models.Update, botName *models.BotName) (Action, error) {
 	text := update.Message.Text
 	words := strings.Split(text, "/")
 
@@ -31,19 +31,19 @@ func ParseCommand(update *models.Update) (Action, error) {
 	}
 
 	switch strings.TrimSpace(words[1]) {
-	case "new":
+	case "new", "new@" + botName.Name:
 		return Action{
 			action: NewList,
 			arg1:   "",
 			arg2:   "",
 		}, nil
-	case "close":
+	case "close", "close@" + botName.Name:
 		return Action{
 			action: CloseList,
 			arg1:   "",
 			arg2:   "",
 		}, nil
-	case "add":
+	case "add", "add@" + botName.Name:
 		if len(words) < 4 {
 			return Action{}, errors.New("not enough arguments")
 		}
@@ -52,7 +52,7 @@ func ParseCommand(update *models.Update) (Action, error) {
 			arg1:   strings.TrimSpace(words[2]),
 			arg2:   strings.TrimSpace(words[3]),
 		}, nil
-	case "modifyname":
+	case "modifyname", "modifyname@" + botName.Name:
 		if len(words) < 4 {
 			return Action{}, errors.New("not enough arguments")
 		}
@@ -61,7 +61,7 @@ func ParseCommand(update *models.Update) (Action, error) {
 			arg1:   strings.TrimSpace(words[2]),
 			arg2:   strings.TrimSpace(words[3]),
 		}, nil
-	case "modifyquantity":
+	case "modifyquantity", "modifyquantity@" + botName.Name:
 		if len(words) < 4 {
 			return Action{}, errors.New("not enough arguments")
 		}
@@ -70,7 +70,7 @@ func ParseCommand(update *models.Update) (Action, error) {
 			arg1:   strings.TrimSpace(words[2]),
 			arg2:   strings.TrimSpace(words[3]),
 		}, nil
-	case "delete":
+	case "delete", "delete@" + botName.Name:
 		if len(words) < 3 {
 			return Action{}, errors.New("not enough arguments")
 		}

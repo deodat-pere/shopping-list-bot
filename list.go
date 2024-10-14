@@ -46,9 +46,10 @@ type ListMap struct {
 	lists map[any]List
 }
 
-func (lmap ListMap) closeList(chatID any, b *bot.Bot, ctx context.Context) error {
+func (lmap ListMap) closeList(chatID any, callingMsgID int, b *bot.Bot, ctx context.Context) error {
 	list, prs := lmap.lists[chatID]
 	if !prs {
+		reactMessage(ctx, b, chatID, callingMsgID, "🤔")
 		return errors.New("no list to close")
 	}
 
@@ -65,10 +66,12 @@ func (lmap ListMap) closeList(chatID any, b *bot.Bot, ctx context.Context) error
 
 	delete(lmap.lists, chatID)
 
+	reactMessage(ctx, b, chatID, callingMsgID, "👍")
+
 	return nil
 }
 
-func (lmap ListMap) newList(chatID any, b *bot.Bot, ctx context.Context) error {
+func (lmap ListMap) newList(chatID any, callingMsgID int, b *bot.Bot, ctx context.Context) error {
 	list, prs := lmap.lists[chatID]
 	if prs {
 		msgID := list.msgID
@@ -103,53 +106,67 @@ func (lmap ListMap) newList(chatID any, b *bot.Bot, ctx context.Context) error {
 		DisableNotification: true,
 	})
 
+	deleteMessage(ctx, b, chatID, callingMsgID)
+
 	return err
 }
 
-func (lmap ListMap) addItem(chatID any, action Action) (int, error) {
+func (lmap ListMap) addItem(b *bot.Bot, ctx context.Context, chatID any, msgID int, action Action) (int, error) {
 	list, prs := lmap.lists[chatID]
 
 	if !prs {
+		reactMessage(ctx, b, chatID, msgID, "🤔")
 		return 0, errors.New("no list to edit")
 	}
 
 	name, quantity := action.arg1, action.arg2
 	list.addItem(name, quantity)
+	deleteMessage(ctx, b, chatID, msgID)
+
 	return list.msgID, nil
 }
 
-func (lmap ListMap) modifyName(chatID any, action Action) (int, error) {
+func (lmap ListMap) modifyName(b *bot.Bot, ctx context.Context, chatID any, msgID int, action Action) (int, error) {
 	list, prs := lmap.lists[chatID]
 
 	if !prs {
+		reactMessage(ctx, b, chatID, msgID, "🤔")
 		return 0, errors.New("no list to edit")
 	}
 
 	name, newName := action.arg1, action.arg2
 	list.modifyName(name, newName)
+	deleteMessage(ctx, b, chatID, msgID)
+
 	return list.msgID, nil
 }
 
-func (lmap ListMap) modifyQuantity(chatID any, action Action) (int, error) {
+func (lmap ListMap) modifyQuantity(b *bot.Bot, ctx context.Context, chatID any, msgID int, action Action) (int, error) {
 	list, prs := lmap.lists[chatID]
 
 	if !prs {
+		reactMessage(ctx, b, chatID, msgID, "🤔")
 		return 0, errors.New("no list to edit")
 	}
 
 	name, quantity := action.arg1, action.arg2
 	list.modifyQuantity(name, quantity)
+	deleteMessage(ctx, b, chatID, msgID)
+
 	return list.msgID, nil
 }
 
-func (lmap ListMap) deleteItem(chatID any, action Action) (int, error) {
+func (lmap ListMap) deleteItem(b *bot.Bot, ctx context.Context, chatID any, msgID int, action Action) (int, error) {
 	list, prs := lmap.lists[chatID]
 
 	if !prs {
+		reactMessage(ctx, b, chatID, msgID, "🤔")
 		return 0, errors.New("no list to edit")
 	}
 
 	name := action.arg1
 	list.deleteItem(name)
+	deleteMessage(ctx, b, chatID, msgID)
+
 	return list.msgID, nil
 }

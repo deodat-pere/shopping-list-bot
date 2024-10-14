@@ -54,69 +54,57 @@ func handler(ctx context.Context, b *bot.Bot, update *models.Update) {
 		return
 	}
 
-	action, err := ParseCommand(update)
+	botName, err := b.GetMyName(ctx, &bot.GetMyNameParams{})
+
+	if err != nil {
+		println("Couldn't get name")
+		return
+	}
+
+	action, err := ParseCommand(update, &botName)
 
 	if err != nil {
 		return
 	}
 
 	chatID := update.Message.Chat.ID
+	msgID := update.Message.ID
 
 	switch action.action {
 	case NewList:
-		err := LMAP.newList(chatID, b, ctx)
+		err := LMAP.newList(chatID, msgID, b, ctx)
 		if err != nil {
 			fmt.Println(err)
 		}
 	case CloseList:
-		err := LMAP.closeList(chatID, b, ctx)
+		err := LMAP.closeList(chatID, msgID, b, ctx)
 		if err != nil {
 			fmt.Println(err)
 		}
 	case NewItem:
-		msgID, err := LMAP.addItem(chatID, action)
+		msgID, err := LMAP.addItem(b, ctx, chatID, msgID, action)
 		if err == nil {
 			editMessage(ctx, b, chatID, msgID)
 		}
 
 	case ModifyName:
-		msgID, err := LMAP.modifyName(chatID, action)
+		msgID, err := LMAP.modifyName(b, ctx, chatID, msgID, action)
 		if err == nil {
 			editMessage(ctx, b, chatID, msgID)
 		}
 	case ModifyQuantity:
-		msgID, err := LMAP.modifyQuantity(chatID, action)
+		msgID, err := LMAP.modifyQuantity(b, ctx, chatID, msgID, action)
 		if err == nil {
 			editMessage(ctx, b, chatID, msgID)
 		}
 	case DeleteItem:
-		msgID, err := LMAP.deleteItem(chatID, action)
+		msgID, err := LMAP.deleteItem(b, ctx, chatID, msgID, action)
 		if err == nil {
 			editMessage(ctx, b, chatID, msgID)
 		}
 	}
 }
 
-func editMessage(ctx context.Context, b *bot.Bot, chatID any, msgID int) {
-	list := LMAP.lists[chatID]
-	newtext := "Liste de course:\n"
-	for name, quantity := range list.items {
-		newtext += "- `" + name + "`: " + quantity + "\n"
-	}
-
-	_, err := b.EditMessageText(ctx, &bot.EditMessageTextParams{
-		ChatID:    chatID,
-		MessageID: msgID,
-		Text:      newtext,
-		ParseMode: "Markdown",
-	})
-
-	if err != nil {
-		fmt.Println(err)
-	}
-}
-
 type Config struct {
-	Token    string `yaml:"token"`
-	Username string `yaml:"username"`
+	Token string `yaml:"token"`
 }
