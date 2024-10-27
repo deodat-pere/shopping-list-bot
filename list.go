@@ -3,6 +3,7 @@ package main
 import (
 	"context"
 	"errors"
+	"time"
 
 	"github.com/go-telegram/bot"
 )
@@ -67,6 +68,10 @@ func (lmap ListMap) closeList(chatID any, callingMsgID int, b *bot.Bot, ctx cont
 	delete(lmap.lists, chatID)
 
 	reactMessage(ctx, b, chatID, callingMsgID, "👍")
+
+	time.Sleep(2 * 1000 * 1000 * 1000) // Sleep for 2 seconds
+
+	deleteMessage(ctx, b, chatID, callingMsgID)
 
 	return nil
 }

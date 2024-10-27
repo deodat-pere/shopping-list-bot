@@ -44,14 +44,21 @@ func ParseCommand(update *models.Update, botName string) (Action, error) {
 			arg2:   "",
 		}, nil
 	case "add", "add@" + botName:
-		if len(words) < 4 {
+		if len(words) < 3 {
 			return Action{}, errors.New("not enough arguments")
+		} else if len(words) == 3 {
+			return Action{
+				action: NewItem,
+				arg1:   strings.TrimSpace(words[2]),
+				arg2:   "",
+			}, nil
+		} else {
+			return Action{
+				action: NewItem,
+				arg1:   strings.TrimSpace(words[2]),
+				arg2:   strings.TrimSpace(words[3]),
+			}, nil
 		}
-		return Action{
-			action: NewItem,
-			arg1:   strings.TrimSpace(words[2]),
-			arg2:   strings.TrimSpace(words[3]),
-		}, nil
 	case "modifyname", "modifyname@" + botName:
 		if len(words) < 4 {
 			return Action{}, errors.New("not enough arguments")
